@@ -24,6 +24,7 @@ torch::Tensor cutlass_fp8gemm_batched_kernel(
     using ElementA = cutlass::float_e4m3_t;
     using ElementB = cutlass::float_e4m3_t;
     using ElementOutput = cutlass::bfloat16_t;
+    using ElementOutputFp8Accum = cutlass::float_e4m3_t;
     using ElementAccumulator = float;
     using ElementCompute = float;
 
@@ -64,6 +65,11 @@ torch::Tensor cutlass_fp8gemm_batched_kernel(
     auto output = torch::empty({batch_size, out_h, out_w}, 
         torch::TensorOptions()
             .dtype(torch::kBFloat16)
+            .device(a.device()));
+
+    auto outputFp8 = torch::empty({batch_size, out_h, out_w}, 
+        torch::TensorOptions()
+            .dtype(torch::kBFloat16) // not sure what to use here for fp8 accum
             .device(a.device()));
 
     float* input_scale_ptr = input_scale.data_ptr<float>();
